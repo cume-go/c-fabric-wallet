@@ -5,10 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	cbor "github.com/ipfs/go-ipld-cbor"
 	"github.com/minio/blake2b-simd"
 	"golang.org/x/xerrors"
-
 )
 
 //func init() {
@@ -66,15 +64,15 @@ func (a Address) Empty() bool {
 	return a == Undef
 }
 
-// Unmarshal unmarshals the cbor bytes into the address.
-func (a Address) Unmarshal(b []byte) error {
-	return cbor.DecodeInto(b, &a)
-}
-
-// Marshal marshals the address to cbor.
-func (a Address) Marshal() ([]byte, error) {
-	return cbor.DumpObject(a)
-}
+//// Unmarshal unmarshals the cbor bytes into the address.
+//func (a Address) Unmarshal(b []byte) error {
+//	return cbor.DecodeInto(b, &a)
+//}
+//
+//// Marshal marshals the address to cbor.
+//func (a Address) Marshal() ([]byte, error) {
+//	return cbor.DumpObject(a)
+//}
 
 // UnmarshalJSON implements the json unmarshal interface.
 func (a *Address) UnmarshalJSON(b []byte) error {
