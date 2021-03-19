@@ -4,8 +4,8 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/cume-go/c-fabric-wallet/address"
 	"github.com/minio/blake2b-simd"
-	"mytest/c-fabric-wallet/address"
 	"strings"
 )
 
