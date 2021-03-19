@@ -24,7 +24,7 @@ func PublicKey(sk []byte) []byte {
 }
 
 // Sign signs the given message, which must be 32 bytes long.
-func Sign(sk, msg []byte) ([]byte, error) {
+func sign(sk, msg []byte) ([]byte, error) {
 	return secp256k1.Sign(msg, sk)
 }
 
@@ -34,7 +34,7 @@ func Equals(sk, other []byte) bool {
 }
 
 // Verify checks the given signature and returns true if it is valid.
-func Verify(pk, msg, signature []byte) bool {
+func verify(pk, msg, signature []byte) bool {
 	if len(signature) == 65 {
 		// Drop the V (1byte) in [R | S | V] style signatures.
 		// The V (1byte) is the recovery bit and is not apart of the signature verification.

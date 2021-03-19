@@ -9,7 +9,6 @@ import (
 	"strings"
 )
 
-
 type Key struct {
 	PrivateKey []byte
 
@@ -63,7 +62,7 @@ func NewKeyFromString(privateKey string) (*Key, error) {
 
 func (k *Key) Sign(msg []byte) ([]byte, error) {
 	b2sum := blake2b.Sum256(msg)
-	sig, err := Sign(k.PrivateKey, b2sum[:])
+	sig, err := sign(k.PrivateKey, b2sum[:])
 	if err != nil {
 		return nil, err
 	}
@@ -71,23 +70,11 @@ func (k *Key) Sign(msg []byte) ([]byte, error) {
 	return sig, nil
 }
 
-func (k *Key)GetPrivkey()(string){
+func (k *Key) GetPrivkey() (string) {
 	return hex.EncodeToString(k.PrivateKey)
 }
 
-func  GenPrivateFromMnemonic(mnemonic string) ([]byte, error) {
-	reader := strings.NewReader(mnemonic)
-
-	priv, err := GenerateKeyFromSeed(reader)
-	if err != nil {
-		return nil, err
-	}
-	return priv, nil
-}
-
-
-
-func verify(sig []byte, a address.Address, msg []byte) error {
+func VerifyFromAddress(sig []byte, addr string, msg []byte) error {
 	b2sum := blake2b.Sum256(msg)
 	pubk, err := EcRecover(b2sum[:], sig)
 	if err != nil {
@@ -99,9 +86,34 @@ func verify(sig []byte, a address.Address, msg []byte) error {
 		return err
 	}
 
-	if a != maybeaddr {
+	if addr != maybeaddr.String() {
 		return fmt.Errorf("signature did not match")
 	}
 
 	return nil
+}
+
+func GenPrivateFromMnemonic(mnemonic string) ([]byte, error) {
+	reader := strings.NewReader(mnemonic)
+
+	priv, err := GenerateKeyFromSeed(reader)
+	if err != nil {
+		return nil, err
+	}
+	return priv, nil
+}
+
+// 从签名信息中获取钱包地址
+func GetAddressFromSignature(sig []byte, msg []byte) (string, error) {
+	b2sum := blake2b.Sum256(msg)
+	pubk, err := EcRecover(b2sum[:], sig)
+	if err != nil {
+		return "", err
+	}
+
+	addr, err := address.NewSecp256k1Address(pubk)
+	if err != nil {
+		return "", err
+	}
+	return addr.String(), nil
 }
