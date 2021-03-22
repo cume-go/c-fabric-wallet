@@ -86,6 +86,8 @@ func VerifyFromAddress(sig []byte, addr string, msg []byte) error {
 		return err
 	}
 
+	fmt.Println(maybeaddr)
+
 	if addr != maybeaddr.String() {
 		return fmt.Errorf("signature did not match")
 	}
@@ -101,19 +103,4 @@ func GenPrivateFromMnemonic(mnemonic string) ([]byte, error) {
 		return nil, err
 	}
 	return priv, nil
-}
-
-// 从签名信息中获取钱包地址
-func GetAddressFromSignature(sig []byte, msg []byte) (string, error) {
-	b2sum := blake2b.Sum256(msg)
-	pubk, err := EcRecover(b2sum[:], sig)
-	if err != nil {
-		return "", err
-	}
-
-	addr, err := address.NewSecp256k1Address(pubk)
-	if err != nil {
-		return "", err
-	}
-	return addr.String(), nil
 }
