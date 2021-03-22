@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"github.com/cume-go/c-fabric-wallet/address"
 	"github.com/minio/blake2b-simd"
+	"reflect"
+	"sort"
 	"strings"
 )
 
@@ -102,4 +104,16 @@ func GenPrivateFromMnemonic(mnemonic string) ([]byte, error) {
 		return nil, err
 	}
 	return priv, nil
+}
+// 格式化要签名的参数
+func FormatSignParam(i interface{})string{
+	reflectValue := reflect.ValueOf(i)
+	reflectType := reflect.TypeOf(i)
+	num := reflectType.NumField()
+	var pList = make([]string, 0, 0)
+	for key:= 0; key<num; key++{
+		pList = append(pList, reflectType.Field(key).Name+"="+fmt.Sprint(reflectValue.Field(key)))
+	}
+	sort.Strings(pList)
+	return strings.Join(pList,"&")
 }
