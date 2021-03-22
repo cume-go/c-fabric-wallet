@@ -109,11 +109,20 @@ func GenPrivateFromMnemonic(mnemonic string) ([]byte, error) {
 func FormatSignParam(i interface{})string{
 	reflectValue := reflect.ValueOf(i)
 	reflectType := reflect.TypeOf(i)
-	num := reflectType.NumField()
 	var pList = make([]string, 0, 0)
-	for key:= 0; key<num; key++{
-		pList = append(pList, reflectType.Field(key).Name+"="+fmt.Sprint(reflectValue.Field(key)))
+	if reflectType.Kind() == reflect.Map {
+		m := reflectValue.MapRange()
+		for m.Next() {
+			pList = append(pList, fmt.Sprint(m.Key())+"="+fmt.Sprint(m.Value()))
+		}
+	} else if reflectType.Kind() == reflect.Struct {
+		num := reflectType.NumField()
+		for key:= 0; key<num; key++{
+			pList = append(pList, reflectType.Field(key).Name+"="+fmt.Sprint(reflectValue.Field(key)))
+		}
 	}
+
+
 	sort.Strings(pList)
 	return strings.Join(pList,"&")
 }
