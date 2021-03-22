@@ -86,7 +86,6 @@ func VerifyFromAddress(sig []byte, addr string, msg []byte) error {
 		return err
 	}
 
-	fmt.Println(maybeaddr)
 
 	if addr != maybeaddr.String() {
 		return fmt.Errorf("signature did not match")
