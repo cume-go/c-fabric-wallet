@@ -113,12 +113,39 @@ func FormatSignParam(i interface{})string{
 	if reflectType.Kind() == reflect.Map {
 		m := reflectValue.MapRange()
 		for m.Next() {
-			pList = append(pList, fmt.Sprint(m.Key())+"="+fmt.Sprint(m.Value()))
+			if reflect.TypeOf(m.Value().Interface()).Kind() == reflect.Slice {
+				n:= reflect.ValueOf(m.Value().Interface())
+				if n.Kind() == reflect.Slice {
+					s := ""
+					for k := 0; k < n.Len(); k++ {
+						if len(s) > 0 {
+							s = s+"&"
+						}
+						s = s+FormatSignParam(n.Index(k).Interface())
+					}
+					pList = append(pList, fmt.Sprint(m.Key())+"=["+s+"]")
+				}
+			} else {
+				pList = append(pList, fmt.Sprint(m.Key())+"="+fmt.Sprint(m.Value()))
+			}
 		}
 	} else if reflectType.Kind() == reflect.Struct {
 		num := reflectType.NumField()
 		for key:= 0; key<num; key++{
-			pList = append(pList, reflectType.Field(key).Name+"="+fmt.Sprint(reflectValue.Field(key)))
+			if reflectValue.Field(key).Kind() == reflect.Slice {
+				//fmt.Println(reflect.TypeOf(reflectValue.Field(key).Index(0).Interface()).Field(0))
+				s := ""
+				for k := 0; k < reflectValue.Field(key).Len(); k++ {
+					if len(s) > 0 {
+						s = s+"&"
+					}
+					s = s+FormatSignParam(reflectValue.Field(key).Index(k).Interface())
+				}
+				pList = append(pList, reflectType.Field(key).Name+"=["+s+"]")
+
+			} else {
+				pList = append(pList, reflectType.Field(key).Name+"="+fmt.Sprint(reflectValue.Field(key)))
+			}
 		}
 	}
 
