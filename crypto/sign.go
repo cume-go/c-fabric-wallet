@@ -88,7 +88,6 @@ func VerifyFromAddress(sig []byte, addr string, msg []byte) error {
 		return err
 	}
 
-
 	if addr != maybeaddr.String() {
 		return fmt.Errorf("signature did not match")
 	}
@@ -105,8 +104,9 @@ func GenPrivateFromMnemonic(mnemonic string) ([]byte, error) {
 	}
 	return priv, nil
 }
+
 // 格式化要签名的参数
-func FormatSignParam(i interface{})string{
+func FormatSignParam(i interface{}) string {
 	reflectValue := reflect.ValueOf(i)
 	reflectType := reflect.TypeOf(i)
 	var pList = make([]string, 0, 0)
@@ -114,14 +114,14 @@ func FormatSignParam(i interface{})string{
 		m := reflectValue.MapRange()
 		for m.Next() {
 			if reflect.TypeOf(m.Value().Interface()).Kind() == reflect.Slice {
-				n:= reflect.ValueOf(m.Value().Interface())
+				n := reflect.ValueOf(m.Value().Interface())
 				if n.Kind() == reflect.Slice {
 					s := ""
 					for k := 0; k < n.Len(); k++ {
 						if len(s) > 0 {
-							s = s+"&"
+							s = s + "&"
 						}
-						s = s+FormatSignParam(n.Index(k).Interface())
+						s = s + FormatSignParam(n.Index(k).Interface())
 					}
 					pList = append(pList, fmt.Sprint(m.Key())+"=["+s+"]")
 				}
@@ -131,15 +131,15 @@ func FormatSignParam(i interface{})string{
 		}
 	} else if reflectType.Kind() == reflect.Struct {
 		num := reflectType.NumField()
-		for key:= 0; key<num; key++{
+		for key := 0; key < num; key++ {
 			if reflectValue.Field(key).Kind() == reflect.Slice {
 				//fmt.Println(reflect.TypeOf(reflectValue.Field(key).Index(0).Interface()).Field(0))
 				s := ""
 				for k := 0; k < reflectValue.Field(key).Len(); k++ {
 					if len(s) > 0 {
-						s = s+"&"
+						s = s + "&"
 					}
-					s = s+FormatSignParam(reflectValue.Field(key).Index(k).Interface())
+					s = s + FormatSignParam(reflectValue.Field(key).Index(k).Interface())
 				}
 				pList = append(pList, reflectType.Field(key).Name+"=["+s+"]")
 
@@ -147,9 +147,27 @@ func FormatSignParam(i interface{})string{
 				pList = append(pList, reflectType.Field(key).Name+"="+fmt.Sprint(reflectValue.Field(key)))
 			}
 		}
+	} else if reflectType.Kind() == reflect.Ptr {
+		num := reflectType.Elem().NumField()
+		for key := 0; key < num; key++ {
+			if reflectValue.Elem().Field(key).Kind() == reflect.Slice {
+				//fmt.Println(reflect.TypeOf(reflectValue.Field(key).Index(0).Interface()).Field(0))
+				s := ""
+				for k := 0; k < reflectValue.Elem().Field(key).Len(); k++ {
+					if len(s) > 0 {
+						s = s + "&"
+					}
+					s = s + FormatSignParam(reflectValue.Elem().Field(key).Index(k).Interface())
+				}
+				pList = append(pList, reflectType.Elem().Field(key).Name+"=["+s+"]")
+
+			} else {
+				pList = append(pList, reflectType.Elem().Field(key).Name+"="+fmt.Sprint(reflectValue.Elem().Field(key)))
+			}
+
+		}
 	}
 
-
 	sort.Strings(pList)
-	return strings.Join(pList,"&")
+	return strings.Join(pList, "&")
 }
